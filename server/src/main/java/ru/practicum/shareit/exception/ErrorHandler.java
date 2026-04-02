@@ -43,4 +43,10 @@ public class ErrorHandler {
     public ErrorResponse handleAccessDeniedException(final AccessDeniedException e) {
         return new ErrorResponse("Доступ запрещен", e.getMessage());
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalStateException(final IllegalStateException e) {
+        return new ErrorResponse("Вещь недоступна для бронирования", e.getMessage());
+    }
 }

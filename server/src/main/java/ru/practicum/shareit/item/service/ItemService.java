@@ -18,7 +18,15 @@ public interface ItemService {
 
     List<ItemDto> searchItems(String text);
 
+    List<Item> getItemsByRequestIdIn(List<Long> ids);
+
     ItemDto getAboutItem(Long id);
 
+    List<Item> getAllItems();
+
+    List<Item> findByOwnerId(Long userId);
+
     CommentDto addComment(Long userId, Long itemId, CommentCreateDto commentCreateDto);
+
+    void deleteItem(Long itemId);
 }

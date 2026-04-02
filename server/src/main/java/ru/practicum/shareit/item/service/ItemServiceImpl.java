@@ -77,6 +77,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public void deleteItem(Long itemId) {
+        itemRepository.deleteById(itemId);
+    }
+
+    @Override
     public ItemDto updateItem(Long userId, Long itemId, ItemDto dto) {
 
         Item item = getItemById(itemId);
@@ -117,6 +122,16 @@ public class ItemServiceImpl implements ItemService {
         dto.setComments(comments);
 
         return dto;
+    }
+
+    @Override
+    public List<Item> getAllItems() {
+        return itemRepository.findAll();
+    }
+
+    @Override
+    public List<Item> findByOwnerId(Long userId) {
+        return itemRepository.findByOwnerId(userId);
     }
 
     @Override
@@ -172,5 +187,10 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
         return items;
+    }
+
+    @Override
+    public List<Item> getItemsByRequestIdIn(List<Long> ids) {
+        return itemRepository.findByRequestIdIn(ids);
     }
 }
