@@ -57,4 +57,20 @@ class ErrorHandlerTest {
                 .andExpect(jsonPath("$.error").value("Вещь недоступна для бронирования"))
                 .andExpect(jsonPath("$.message").value("Нельзя забронировать"));
     }
+
+    @Test
+    void handleThrowable() throws Exception {
+        mvc.perform(get("/tests/any-error"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").value("Ошибка на сервере"))
+                .andExpect(jsonPath("$.message").value("Что-то пошло не так"));
+    }
+
+    @Test
+    void handleUnavailableItemException() throws Exception {
+        mvc.perform(get("/tests/unavailable-item"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Вещь недоступна для бронирования"))
+                .andExpect(jsonPath("$.message").value("Вещь временно недоступна"));
+    }
 }

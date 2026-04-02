@@ -106,6 +106,6 @@ class UserControllerTest {
                 .build();
 
         mvc.perform(delete("/users/5"))
-                        .andExpect(status().isOk());
+                .andExpect(status().isOk());
     }
 }

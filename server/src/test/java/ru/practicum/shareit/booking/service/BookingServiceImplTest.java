@@ -327,4 +327,273 @@ class BookingServiceImplTest {
 
         assertEquals(1, result.size());
     }
+
+    @Test
+    void findBookingsByUserId_currentState() {
+        // Подготовка данных
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        // Бронирование с датами, охватывающими текущий момент
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().minusDays(1))
+                .end(LocalDateTime.now().plusDays(1))
+                .itemId(item.getId())
+                .build();
+
+        bookingService.create(booker.getId(), dto);
+
+        List<BookingDto> result = bookingService.findBookingsByUserId(booker.getId(), BookingState.CURRENT);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findBookingsByUserId_futureState() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        bookingService.create(booker.getId(), dto);
+
+        List<BookingDto> result = bookingService.findBookingsByUserId(booker.getId(), BookingState.FUTURE);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findBookingsByUserId_waitingState() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        bookingService.create(booker.getId(), dto);
+
+        List<BookingDto> result = bookingService.findBookingsByUserId(booker.getId(), BookingState.WAITING);
+
+        assertEquals(1, result.size());
+        assertEquals(BookingStatus.WAITING, result.get(0).getStatus());
+    }
+
+    @Test
+    void findBookingsByUserId_rejectedState() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        BookingDto booking = bookingService.create(booker.getId(), dto);
+        bookingService.approveBooking(booking.getId(), owner.getId(), false); // REJECTED
+
+        List<BookingDto> result = bookingService.findBookingsByUserId(booker.getId(), BookingState.REJECTED);
+
+        assertEquals(1, result.size());
+        assertEquals(BookingStatus.REJECTED, result.get(0).getStatus());
+    }
+
+    @Test
+    void findBookingsByUserId_invalidState_shouldThrow() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+    }
+
+    @Test
+    void findBookingsByItemOwnerId_currentState() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().minusDays(1))
+                .end(LocalDateTime.now().plusDays(1))
+                .itemId(item.getId())
+                .build();
+
+        bookingService.create(booker.getId(), dto);
+
+        List<BookingDto> result = bookingService.findBookingsByItemOwnerId(owner.getId(), BookingState.CURRENT);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findBookingsByItemOwnerId_futureState() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        bookingService.create(booker.getId(), dto);
+
+        List<BookingDto> result = bookingService.findBookingsByItemOwnerId(owner.getId(), BookingState.FUTURE);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findBookingsByItemOwnerId_waitingState() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        bookingService.create(booker.getId(), dto);
+
+        List<BookingDto> result = bookingService.findBookingsByItemOwnerId(owner.getId(), BookingState.WAITING);
+
+        assertEquals(1, result.size());
+        assertEquals(BookingStatus.WAITING, result.get(0).getStatus());
+    }
+
+    @Test
+    void findBookingsByItemOwnerId_rejectedState() {
+        UserDto owner = userService.saveUser(UserDto.builder()
+                .name("Owner")
+                .email("owner@test.com")
+                .build());
+
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Booker")
+                .email("booker@test.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
+                .name("Item")
+                .description("Desc")
+                .available(true)
+                .build());
+
+        BookingCreateDto dto = BookingCreateDto.builder()
+                .start(LocalDateTime.now().plusDays(1))
+                .end(LocalDateTime.now().plusDays(2))
+                .itemId(item.getId())
+                .build();
+
+        BookingDto booking = bookingService.create(booker.getId(), dto);
+        bookingService.approveBooking(booking.getId(), owner.getId(), false);
+
+        List<BookingDto> result = bookingService.findBookingsByItemOwnerId(owner.getId(), BookingState.REJECTED);
+
+        assertEquals(1, result.size());
+        assertEquals(BookingStatus.REJECTED, result.get(0).getStatus());
+    }
 }

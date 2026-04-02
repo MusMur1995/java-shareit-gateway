@@ -32,4 +32,14 @@ public class TestController {
     public void throwIllegal() {
         throw new IllegalStateException("Нельзя забронировать");
     }
+
+    @GetMapping("/any-error")
+    public void throwAnyError() {
+        throw new RuntimeException("Что-то пошло не так");
+    }
+
+    @GetMapping("/unavailable-item")
+    public void throwUnavailableItem() {
+        throw new UnavailableItemException("Вещь временно недоступна");
+    }
 }

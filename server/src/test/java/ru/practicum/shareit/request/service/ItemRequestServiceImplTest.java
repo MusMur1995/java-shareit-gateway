@@ -176,7 +176,7 @@ class ItemRequestServiceImplTest {
         List<ItemRequestDto> requests = requestService.getUserRequests(requestorDto.getId());
 
         ItemRequest request1 = entityManager.createQuery(
-                "SELECT r FROM ItemRequest r WHERE r.id = :requestId", ItemRequest.class)
+                        "SELECT r FROM ItemRequest r WHERE r.id = :requestId", ItemRequest.class)
                 .setParameter("requestId", requestWithId1.getId())
                 .getSingleResult();
 

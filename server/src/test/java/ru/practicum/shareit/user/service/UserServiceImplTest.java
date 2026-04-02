@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -149,5 +150,49 @@ class UserServiceImplTest {
     void deleteUser_notFound_shouldThrow() {
         Assertions.assertThrows(NotFoundException.class,
                 () -> userService.deleteUser(999L));
+    }
+
+    @Test
+    void saveUser_invalidEmailWithoutAt_shouldThrow() {
+        UserDto dto = UserDto.builder()
+                .name("User")
+                .email("invalid-email")  // нет символа @
+                .build();
+
+        Assertions.assertThrows(ValidationException.class,
+                () -> userService.saveUser(dto));
+    }
+
+    @Test
+    void saveUser_nullEmail_shouldThrow() {
+        UserDto dto = UserDto.builder()
+                .name("User")
+                .email(null)  // null email
+                .build();
+
+        Assertions.assertThrows(ValidationException.class,
+                () -> userService.saveUser(dto));
+    }
+
+    @Test
+    void saveUser_emptyEmail_shouldThrow() {
+        UserDto dto = UserDto.builder()
+                .name("User")
+                .email("")  // пустой email
+                .build();
+
+        Assertions.assertThrows(ValidationException.class,
+                () -> userService.saveUser(dto));
+    }
+
+    @Test
+    void saveUser_blankEmail_shouldThrow() {
+        UserDto dto = UserDto.builder()
+                .name("User")
+                .email("   ")  // пробелы
+                .build();
+
+        Assertions.assertThrows(ValidationException.class,
+                () -> userService.saveUser(dto));
     }
 }
