@@ -27,7 +27,6 @@ class BookingClientTest {
             BookingDto dto = new BookingDto();
             bookingClient.createBooking(1L, dto);
         } catch (Exception e) {
-            // Ожидаемо, сервер не запущен
         }
     }
 
@@ -36,7 +35,6 @@ class BookingClientTest {
         try {
             bookingClient.approveBooking(1L, 1L, true);
         } catch (Exception e) {
-            // Ожидаемо
         }
     }
 
@@ -45,7 +43,6 @@ class BookingClientTest {
         try {
             bookingClient.getBooking(1L, 1L);
         } catch (Exception e) {
-            // Ожидаемо
         }
     }
 
@@ -54,7 +51,6 @@ class BookingClientTest {
         try {
             bookingClient.getUserBookings(1L, BookingState.ALL);
         } catch (Exception e) {
-            // Ожидаемо
         }
     }
 
@@ -63,7 +59,6 @@ class BookingClientTest {
         try {
             bookingClient.getOwnerBookings(1L, BookingState.ALL);
         } catch (Exception e) {
-            // Ожидаемо
         }
     }
 }

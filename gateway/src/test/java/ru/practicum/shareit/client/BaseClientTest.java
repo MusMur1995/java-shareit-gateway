@@ -31,7 +31,6 @@ class BaseClientTest {
         client = new TestClient(restTemplate);
     }
 
-    // Тестовый класс-наследник для доступа к protected методам
     static class TestClient extends BaseClient {
         public TestClient(RestTemplate rest) {
             super(rest);
@@ -290,7 +289,6 @@ class BaseClientTest {
 
     @Test
     void defaultHeaders_shouldIncludeUserId() {
-        // Проверяем через makeAndSendRequest, что заголовки правильно устанавливаются
         String expectedBody = "Success";
         ResponseEntity<Object> expectedResponse = ResponseEntity.ok(expectedBody);
 

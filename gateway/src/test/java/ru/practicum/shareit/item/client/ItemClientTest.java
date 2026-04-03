@@ -31,7 +31,6 @@ class ItemClientTest {
         assertNotNull(itemClient);
 
         try {
-            // Просто проверяем, что методы можно вызвать (они могут упасть, но для покрытия кода это не важно)
             itemClient.addItem(1L, new ItemDto());
             itemClient.addComment(1L, 1L, new CommentCreateDto());
             itemClient.updateItem(1L, 1L, new ItemDto());
@@ -39,7 +38,6 @@ class ItemClientTest {
             itemClient.getUserItems(1L);
             itemClient.searchItems("test");
         } catch (Exception e) {
-            // Ожидаемо, т.к. сервер не запущен
         }
     }
 }
