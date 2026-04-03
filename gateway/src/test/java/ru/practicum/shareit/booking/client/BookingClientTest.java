@@ -31,7 +31,6 @@ class BookingClientTest {
         } catch (ResourceAccessException e) {
             assertTrue(e.getMessage().contains("Connection refused"));
         } catch (Exception e) {
-            // Другие исключения не ожидаются
         }
     }
 
