@@ -4,10 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.web.client.ResourceAccessException;
 import ru.practicum.shareit.booking.BookingState;
 import ru.practicum.shareit.booking.dto.BookingDto;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @TestPropertySource(properties = "shareit-server.url=http://localhost:9090")
@@ -22,43 +24,50 @@ class BookingClientTest {
     }
 
     @Test
-    void createBooking_shouldNotThrowException() {
+    void createBooking_shouldCallMethod() {
         try {
             BookingDto dto = new BookingDto();
             bookingClient.createBooking(1L, dto);
+        } catch (ResourceAccessException e) {
+            assertTrue(e.getMessage().contains("Connection refused"));
         } catch (Exception e) {
+            // Другие исключения не ожидаются
         }
     }
 
     @Test
-    void approveBooking_shouldNotThrowException() {
+    void approveBooking_shouldCallMethod() {
         try {
             bookingClient.approveBooking(1L, 1L, true);
-        } catch (Exception e) {
+        } catch (ResourceAccessException e) {
+            assertTrue(e.getMessage().contains("Connection refused"));
         }
     }
 
     @Test
-    void getBooking_shouldNotThrowException() {
+    void getBooking_shouldCallMethod() {
         try {
             bookingClient.getBooking(1L, 1L);
-        } catch (Exception e) {
+        } catch (ResourceAccessException e) {
+            assertTrue(e.getMessage().contains("Connection refused"));
         }
     }
 
     @Test
-    void getUserBookings_shouldNotThrowException() {
+    void getUserBookings_shouldCallMethod() {
         try {
             bookingClient.getUserBookings(1L, BookingState.ALL);
-        } catch (Exception e) {
+        } catch (ResourceAccessException e) {
+            assertTrue(e.getMessage().contains("Connection refused"));
         }
     }
 
     @Test
-    void getOwnerBookings_shouldNotThrowException() {
+    void getOwnerBookings_shouldCallMethod() {
         try {
             bookingClient.getOwnerBookings(1L, BookingState.ALL);
-        } catch (Exception e) {
+        } catch (ResourceAccessException e) {
+            assertTrue(e.getMessage().contains("Connection refused"));
         }
     }
 }
