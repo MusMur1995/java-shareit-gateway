@@ -32,7 +32,7 @@ public class ItemRequestController {
 
     @GetMapping
     public ResponseEntity<Object> getUserRequests( // GET /requests
-            @RequestHeader(USER_ID_HEADER) Long userId) {
+                                                   @RequestHeader(USER_ID_HEADER) Long userId) {
 
         log.info("Gateway: получение запросов пользователя userId={}", userId);
 
