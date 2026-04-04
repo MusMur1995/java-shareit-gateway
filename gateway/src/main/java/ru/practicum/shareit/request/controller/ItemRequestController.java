@@ -21,7 +21,7 @@ public class ItemRequestController {
 
 
     @PostMapping
-    public ResponseEntity<Object> addRequest(@RequestHeader(USER_ID_HEADER) @Positive Long userId, // POST /requests
+    public ResponseEntity<Object> addRequest(@RequestHeader(USER_ID_HEADER) @Positive Long userId,
                                              @Valid @RequestBody ItemRequestDto dto) {
 
         log.info("Gateway: создание запроса userId={}, dto={}", userId, dto);
@@ -31,8 +31,8 @@ public class ItemRequestController {
 
 
     @GetMapping
-    public ResponseEntity<Object> getUserRequests( // GET /requests
-                                                   @RequestHeader(USER_ID_HEADER) Long userId) {
+    public ResponseEntity<Object> getUserRequests(
+            @RequestHeader(USER_ID_HEADER) Long userId) {
 
         log.info("Gateway: получение запросов пользователя userId={}", userId);
 
@@ -41,7 +41,7 @@ public class ItemRequestController {
 
 
     @GetMapping("/all")
-    public ResponseEntity<Object> getAllRequests(@RequestHeader(USER_ID_HEADER) Long userId) { // GET /requests/all
+    public ResponseEntity<Object> getAllRequests(@RequestHeader(USER_ID_HEADER) Long userId) {
 
         log.info("Gateway: получение всех запросов userId={}", userId);
 
@@ -50,7 +50,7 @@ public class ItemRequestController {
 
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<Object> getItemRequest(@PathVariable Long requestId) { // GET /requests/{requestId}
+    public ResponseEntity<Object> getItemRequest(@PathVariable Long requestId) {
 
         log.info("Gateway: получение запроса requestId={}", requestId);
 
