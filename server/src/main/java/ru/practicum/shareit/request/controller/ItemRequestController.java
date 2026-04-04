@@ -17,24 +17,23 @@ public class ItemRequestController {
 
 
     @PostMapping
-    public ItemRequestDto addRequest(@RequestHeader(USER_ID_HEADER) Long userId,
+    public ItemRequestDto addRequest(@RequestHeader(USER_ID_HEADER) Long userId, // POST /requests
                                      @Valid @RequestBody ItemRequestDto dto) {
-
         return requestService.addRequest(userId, dto);
     }
 
     @GetMapping
-    public List<ItemRequestDto> getUserRequests(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemRequestDto> getUserRequests(@RequestHeader(USER_ID_HEADER) Long userId) { // GET /requests
         return requestService.getUserRequests(userId);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestDto> getAllRequests(@RequestHeader(USER_ID_HEADER) Long userId) {
+    public List<ItemRequestDto> getAllRequests(@RequestHeader(USER_ID_HEADER) Long userId) { // GET /requests/all
         return requestService.getAllRequests(userId);
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto getItemRequest(@PathVariable Long requestId) {
+    public ItemRequestDto getItemRequest(@PathVariable Long requestId) { // GET /requests/{requestId}
         return requestService.getAboutItemRequest(requestId);
     }
 }

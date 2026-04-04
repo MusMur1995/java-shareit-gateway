@@ -10,12 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.AccessDeniedException;
-import ru.practicum.shareit.item.comment.Comment;
 import ru.practicum.shareit.item.dto.CommentCreateDto;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
@@ -34,6 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ItemServiceImplTest {
     private final ItemService itemService;
     private final UserService userService;
+    private final ItemRequestService requestService;
     private final EntityManager entityManager;
 
 
@@ -44,24 +46,19 @@ class ItemServiceImplTest {
                 .email("Brooks@hate-vampire.com")
                 .build());
 
-        ItemRequest request = new ItemRequest();
-        request.setDescription("Ищу меч");
-        request.setCreated(LocalDateTime.now());
-        request.setRequestor(entityManager.find(User.class, user.getId()));
-        entityManager.persist(request);
+        ItemRequestDto request = requestService.addRequest(user.getId(),
+                ItemRequestDto.builder().description("Ищу меч").build());
 
         ItemDto dto = ItemDto.builder()
                 .name("Меч")
                 .description("Брать только Блэйду")
                 .available(true)
-                .requestId(request.getId().toString())
+                .requestId(String.valueOf(request.getId()))
                 .build();
 
         ItemDto saved = itemService.createItem(user.getId(), dto);
 
         Item item = entityManager.find(Item.class, saved.getId());
-
-        assertEquals("Меч", item.getName());
         assertEquals(request.getId(), item.getRequest().getId());
     }
 
@@ -190,28 +187,45 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void getAboutItem() {
-        UserDto user = userService.saveUser(UserDto.builder()
+    void getAboutItem_shouldReturnItemWithComments() {
+        UserDto owner = userService.saveUser(UserDto.builder()
                 .name("Orochimaro")
                 .email("Snake@ninja.com")
                 .build());
 
-        ItemDto item = itemService.createItem(user.getId(), ItemDto.builder()
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Naruto")
+                .email("Uzumaki@ninja.com")
+                .build());
+
+        ItemDto item = itemService.createItem(owner.getId(), ItemDto.builder()
                 .name("Эдо тенсей")
                 .description("Техника воскрешения")
                 .available(true)
                 .build());
 
-        Comment comment = new Comment();
-        comment.setText("Нужна жертва");
-        comment.setItem(entityManager.find(Item.class, item.getId()));
-        comment.setAuthor(entityManager.find(User.class, user.getId()));
-        comment.setCreated(LocalDateTime.now());
-        entityManager.persist(comment);
+        Booking booking = new Booking();
+        booking.setItem(entityManager.find(Item.class, item.getId()));
+        booking.setBooker(entityManager.find(User.class, booker.getId()));
+        booking.setStart(LocalDateTime.now().minusDays(2));
+        booking.setEnd(LocalDateTime.now().minusDays(1));
+        booking.setStatus(BookingStatus.APPROVED);
+        entityManager.persist(booking);
+
+        CommentCreateDto commentDto = new CommentCreateDto();
+        commentDto.setText("Нужна жертва");
+
+        itemService.addComment(booker.getId(), item.getId(), commentDto);
 
         ItemDto result = itemService.getAboutItem(item.getId());
 
+        assertNotNull(result.getComments());
         assertEquals(1, result.getComments().size());
+
+        CommentDto comment = result.getComments().getFirst();
+        assertEquals("Нужна жертва", comment.getText());
+        assertEquals(booker.getName(), comment.getAuthorName());
+        assertNotNull(comment.getCreated());
     }
 
     @Test
@@ -246,6 +260,11 @@ class ItemServiceImplTest {
                 .build();
         UserDto savedUser = userService.saveUser(userDto);
 
+        UserDto booker = userService.saveUser(UserDto.builder()
+                .name("Луис")
+                .email("Lane@smallville.com")
+                .build());
+
         ItemDto firstItemDto = ItemDto.builder()
                 .name("Karcher CVH 3")
                 .description("Пылесос для автомобиля")
@@ -258,23 +277,40 @@ class ItemServiceImplTest {
                 .available(true)
                 .build();
 
-        itemService.createItem(savedUser.getId(), firstItemDto);
-        itemService.createItem(savedUser.getId(), secondItemDto);
+        ItemDto savedItem1 = itemService.createItem(savedUser.getId(), firstItemDto);
+        ItemDto savedItem2 = itemService.createItem(savedUser.getId(), secondItemDto);
+
+        Booking pastBooking = new Booking();
+        pastBooking.setItem(entityManager.find(Item.class, savedItem1.getId()));
+        pastBooking.setBooker(entityManager.find(User.class, booker.getId()));
+        pastBooking.setStart(LocalDateTime.now().minusDays(5));
+        pastBooking.setEnd(LocalDateTime.now().minusDays(3));
+        pastBooking.setStatus(BookingStatus.APPROVED);
+        entityManager.persist(pastBooking);
+
+        Booking futureBooking = new Booking();
+        futureBooking.setItem(entityManager.find(Item.class, savedItem1.getId()));
+        futureBooking.setBooker(entityManager.find(User.class, booker.getId()));
+        futureBooking.setStart(LocalDateTime.now().plusDays(3));
+        futureBooking.setEnd(LocalDateTime.now().plusDays(5));
+        futureBooking.setStatus(BookingStatus.APPROVED);
+        entityManager.persist(futureBooking);
 
         List<ItemDto> items = itemService.getUserItems(savedUser.getId());
 
+        assertEquals(items.getFirst().getName(), savedItem1.getName());
+        assertEquals(items.getLast().getDescription(), savedItem2.getDescription());
 
-        Item firstItem = entityManager.createQuery("SELECT i FROM Item i WHERE i.name = :name", Item.class)
-                .setParameter("name", "Karcher CVH 3")
-                .getSingleResult();
+        ItemDto firstItem = items.stream()
+                .filter(i -> i.getId().equals(savedItem1.getId()))
+                .findFirst()
+                .orElse(null);
 
-        Item secondItem = entityManager.createQuery("SELECT i FROM Item i WHERE i.name = :name", Item.class)
-                .setParameter("name", "Палатка")
-                .getSingleResult();
-
-
-        assertEquals(items.getFirst().getName(), firstItem.getName());
-        assertEquals(items.getLast().getDescription(), secondItem.getDescription());
+        assertNotNull(firstItem, "Вещь должна быть найдена");
+        assertNotNull(firstItem.getLastBooking(), "lastBooking не должен быть null");
+        assertNotNull(firstItem.getNextBooking(), "nextBooking не должен быть null");
+        assertEquals(pastBooking.getId(), firstItem.getLastBooking().getId());
+        assertEquals(futureBooking.getId(), firstItem.getNextBooking().getId());
     }
 
     @Test
