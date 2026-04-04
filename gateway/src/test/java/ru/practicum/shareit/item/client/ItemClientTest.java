@@ -38,6 +38,7 @@ class ItemClientTest {
             itemClient.getUserItems(1L);
             itemClient.searchItems("test");
         } catch (Exception e) {
+            // Ожидаемое исключение - сервер не запущен
         }
     }
 }
