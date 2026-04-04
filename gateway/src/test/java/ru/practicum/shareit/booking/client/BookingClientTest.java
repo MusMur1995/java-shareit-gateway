@@ -30,7 +30,7 @@ class BookingClientTest {
             bookingClient.createBooking(1L, dto);
         } catch (ResourceAccessException e) {
             assertTrue(e.getMessage().contains("Connection refused"));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
     }
 
